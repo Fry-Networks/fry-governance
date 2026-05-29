@@ -1,0 +1,18 @@
+[algokit]
+min_version = "v1.7.0"
+
+[project]
+type = "contract"
+name = "fry-governance"
+artifacts = "artifacts"
+
+[project.deploy]
+command = "poetry run python scripts/deploy.py"
+
+[project.test]
+command = "poetry run pytest"
+
+[generate.smart_contracts]
+description = "Generate typed clients for smart contracts"
+path = "smart_contracts"
+output_path = "artifacts"

@@ -1,0 +1,1858 @@
+#pragma version 11
+#pragma typetrack false
+
+// algopy.arc4.ARC4Contract.approval_program() -> uint64:
+main:
+    intcblock 1 0 32 8 104100 61700 48500
+    bytecblock base32(E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DA) "fry_asa_id" "total_active_votes" 0x757064 0x76 "min_temp_check_balance" 0x73 "price_value" "price_is_usd" "admin" 0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 0x151f7c75
+    txn ApplicationID
+    bnz main_after_if_else@2
+    // smart_contracts/fry_governance/contract.py:63-64
+    // # Admin address for privileged operations
+    // self.admin = op.Global.zero_address.bytes
+    bytec 9 // "admin"
+    global ZeroAddress
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:65-66
+    // # FRY token ASA ID
+    // self.fry_asa_id = UInt64(0)
+    bytec_1 // "fry_asa_id"
+    intc_1 // 0
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:67-68
+    // # Minimum FRY balance for temp check voting
+    // self.min_temp_check_balance = UInt64(0)
+    bytec 5 // "min_temp_check_balance"
+    intc_1 // 0
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:69-70
+    // # Count of open votes
+    // self.total_active_votes = UInt64(0)
+    bytec_2 // "total_active_votes"
+    intc_1 // 0
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:71-72
+    // # Vote weight multiplier
+    // self.price_value = UInt64(1)
+    bytec 7 // "price_value"
+    intc_0 // 1
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:73-74
+    // # 0=fixed, 1=USD-pegged
+    // self.price_is_usd = UInt64(0)
+    bytec 8 // "price_is_usd"
+    intc_1 // 0
+    app_global_put
+
+main_after_if_else@2:
+    // smart_contracts/fry_governance/contract.py:51
+    // class FryGovernance(ARC4Contract):
+    txn NumAppArgs
+    bz main_admin_update@25
+    txn OnCompletion
+    !
+    assert
+    txn ApplicationID
+    bz main_create_NoOp@21
+    pushbytess 0xb655a692 0xede9c4c8 0xf7d881be 0x7adcc461 0x478af414 0x568e7559 0xb239e8c4 0xca118abe 0x52d2e823 0x010e8c0f 0x00746d93 0xe4e1f3f8 0x6cb9e51a 0xc427b9e4 // method "admin_propose_update(pay)void", method "admin_cancel_update()void", method "opt_in_fry()void", method "admin_set_min_balance(uint64)void", method "admin_set_price(uint64,uint8)void", method "create_vote(byte[32],uint8,uint64,uint64,uint8,uint8,pay)void", method "cast_vote(byte[32],uint8,pay,axfer)void", method "cast_temp_vote(byte[32],uint8,pay)void", method "request_temp_check(byte[32],uint64,pay)void", method "withdraw(byte[32])void", method "admin_close_vote(byte[32])void", method "admin_emergency_refund(byte[32],byte[32])void", method "get_vote(byte[32])(byte[32],uint8,uint64,uint64,uint8,uint8,uint8,byte[32],uint64,uint64[8],uint64[8])", method "get_stake(byte[32],byte[32])(byte[32],byte[32],uint8,uint64,uint64,uint8)"
+    txna ApplicationArgs 0
+    match admin_propose_update admin_cancel_update opt_in_fry admin_set_min_balance admin_set_price create_vote cast_vote cast_temp_vote request_temp_check withdraw admin_close_vote admin_emergency_refund get_vote get_stake
+    err
+
+main_create_NoOp@21:
+    // smart_contracts/fry_governance/contract.py:51
+    // class FryGovernance(ARC4Contract):
+    pushbytes 0x240d2f67 // method "create(uint64)void"
+    txna ApplicationArgs 0
+    match create
+    err
+
+main_admin_update@25:
+    // smart_contracts/fry_governance/contract.py:103
+    // @arc4.baremethod(allow_actions=["UpdateApplication"])
+    txn OnCompletion
+    pushint 4 // UpdateApplication
+    ==
+    txn ApplicationID
+    &&
+    assert
+    // smart_contracts/fry_governance/contract.py:106
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can update"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can update
+    // smart_contracts/fry_governance/contract.py:108-109
+    // # Read proposal box
+    // proposal_data, exists = op.Box.get(UPDATE_PROPOSAL_BOX_KEY)
+    bytec_3 // 0x757064
+    box_get
+    // smart_contracts/fry_governance/contract.py:110
+    // assert exists, "No update proposed"
+    assert // No update proposed
+    // smart_contracts/fry_governance/contract.py:112-113
+    // # Check 48-hour timelock
+    // proposed_at = op.btoi(proposal_data)
+    btoi
+    // smart_contracts/fry_governance/contract.py:114
+    // assert Global.latest_timestamp >= proposed_at + UPDATE_TIMELOCK_SECONDS, "48-hour timelock not elapsed"
+    global LatestTimestamp
+    swap
+    pushint 172800
+    +
+    >=
+    assert // 48-hour timelock not elapsed
+    // smart_contracts/fry_governance/contract.py:116-117
+    // # Delete proposal box (cleanup)
+    // op.Box.delete(UPDATE_PROPOSAL_BOX_KEY)
+    bytec_3 // 0x757064
+    box_del
+    pop
+    // smart_contracts/fry_governance/contract.py:118
+    // log(b"update_executed")
+    pushbytes 0x7570646174655f6578656375746564
+    log
+    // smart_contracts/fry_governance/contract.py:103
+    // @arc4.baremethod(allow_actions=["UpdateApplication"])
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.create[routing]() -> void:
+create:
+    // smart_contracts/fry_governance/contract.py:76
+    // @arc4.abimethod(create="require")
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    // smart_contracts/fry_governance/contract.py:79
+    // self.admin = Account(ADMIN_ADDRESS).bytes
+    bytec 9 // "admin"
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:80
+    // self.fry_asa_id = fry_asa_id.native
+    btoi
+    bytec_1 // "fry_asa_id"
+    swap
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:81
+    // self.min_temp_check_balance = UInt64(0)
+    bytec 5 // "min_temp_check_balance"
+    intc_1 // 0
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:82
+    // self.total_active_votes = UInt64(0)
+    bytec_2 // "total_active_votes"
+    intc_1 // 0
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:83
+    // self.price_value = UInt64(1)
+    bytec 7 // "price_value"
+    intc_0 // 1
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:84
+    // self.price_is_usd = UInt64(0)
+    bytec 8 // "price_is_usd"
+    intc_1 // 0
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:76
+    // @arc4.abimethod(create="require")
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.admin_propose_update[routing]() -> void:
+admin_propose_update:
+    // smart_contracts/fry_governance/contract.py:86
+    // @arc4.abimethod
+    txn GroupIndex
+    intc_0 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_0 // pay
+    ==
+    assert // transaction type is pay
+    // smart_contracts/fry_governance/contract.py:89
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can propose updates"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can propose updates
+    // smart_contracts/fry_governance/contract.py:90
+    // assert Global.group_size == UInt64(2), "Group size must be 2"
+    global GroupSize
+    pushint 2
+    ==
+    assert // Group size must be 2
+    // smart_contracts/fry_governance/contract.py:91
+    // assert mbr_payment.receiver == Global.current_application_address, "Payment must be to contract"
+    dup
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    assert // Payment must be to contract
+    // smart_contracts/fry_governance/contract.py:92
+    // assert mbr_payment.amount >= UInt64(UPDATE_PROPOSAL_BOX_MBR), "Insufficient MBR"
+    gtxns Amount
+    pushint 6900
+    >=
+    assert // Insufficient MBR
+    // smart_contracts/fry_governance/contract.py:94-95
+    // # Check no existing proposal
+    // _length, exists = op.Box.length(UPDATE_PROPOSAL_BOX_KEY)
+    bytec_3 // 0x757064
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:96
+    // assert not exists, "Update already proposed"
+    !
+    assert // Update already proposed
+    // smart_contracts/fry_governance/contract.py:98-99
+    // # Create proposal box with current timestamp
+    // op.Box.create(UPDATE_PROPOSAL_BOX_KEY, UInt64(8))
+    bytec_3 // 0x757064
+    intc_3 // 8
+    box_create
+    pop
+    // smart_contracts/fry_governance/contract.py:100
+    // op.Box.put(UPDATE_PROPOSAL_BOX_KEY, op.itob(Global.latest_timestamp))
+    global LatestTimestamp
+    itob
+    bytec_3 // 0x757064
+    swap
+    box_put
+    // smart_contracts/fry_governance/contract.py:101
+    // log(b"update_proposed")
+    pushbytes 0x7570646174655f70726f706f736564
+    log
+    // smart_contracts/fry_governance/contract.py:86
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.admin_cancel_update[routing]() -> void:
+admin_cancel_update:
+    // smart_contracts/fry_governance/contract.py:123
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can cancel"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can cancel
+    // smart_contracts/fry_governance/contract.py:124
+    // _length, exists = op.Box.length(UPDATE_PROPOSAL_BOX_KEY)
+    bytec_3 // 0x757064
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:125
+    // assert exists, "No update pending"
+    assert // No update pending
+    // smart_contracts/fry_governance/contract.py:126
+    // op.Box.delete(UPDATE_PROPOSAL_BOX_KEY)
+    bytec_3 // 0x757064
+    box_del
+    pop
+    // smart_contracts/fry_governance/contract.py:127
+    // log(b"update_cancelled")
+    pushbytes 0x7570646174655f63616e63656c6c6564
+    log
+    // smart_contracts/fry_governance/contract.py:120
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.opt_in_fry[routing]() -> void:
+opt_in_fry:
+    // smart_contracts/fry_governance/contract.py:132
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can opt in"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can opt in
+    // smart_contracts/fry_governance/contract.py:134-139
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.fry_asa_id,
+    //     asset_receiver=Global.current_application_address,
+    //     asset_amount=0,
+    //     fee=0,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/fry_governance/contract.py:135
+    // xfer_asset=self.fry_asa_id,
+    intc_1 // 0
+    bytec_1 // "fry_asa_id"
+    app_global_get_ex
+    assert // check self.fry_asa_id exists
+    // smart_contracts/fry_governance/contract.py:136
+    // asset_receiver=Global.current_application_address,
+    global CurrentApplicationAddress
+    // smart_contracts/fry_governance/contract.py:137
+    // asset_amount=0,
+    intc_1 // 0
+    itxn_field AssetAmount
+    itxn_field AssetReceiver
+    itxn_field XferAsset
+    // smart_contracts/fry_governance/contract.py:134
+    // itxn.AssetTransfer(
+    pushint 4 // axfer
+    itxn_field TypeEnum
+    // smart_contracts/fry_governance/contract.py:138
+    // fee=0,
+    intc_1 // 0
+    itxn_field Fee
+    // smart_contracts/fry_governance/contract.py:134-139
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.fry_asa_id,
+    //     asset_receiver=Global.current_application_address,
+    //     asset_amount=0,
+    //     fee=0,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/fry_governance/contract.py:129
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.admin_set_min_balance[routing]() -> void:
+admin_set_min_balance:
+    // smart_contracts/fry_governance/contract.py:141
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    // smart_contracts/fry_governance/contract.py:144
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can set min balance"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can set min balance
+    // smart_contracts/fry_governance/contract.py:145
+    // self.min_temp_check_balance = min_balance.native
+    btoi
+    bytec 5 // "min_temp_check_balance"
+    swap
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:141
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.admin_set_price[routing]() -> void:
+admin_set_price:
+    // smart_contracts/fry_governance/contract.py:147
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_0 // 1
+    ==
+    assert // invalid number of bytes for arc4.uint8
+    // smart_contracts/fry_governance/contract.py:152
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can set price"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can set price
+    // smart_contracts/fry_governance/contract.py:153
+    // self.price_value = price_value.native
+    swap
+    btoi
+    bytec 7 // "price_value"
+    swap
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:154
+    // self.price_is_usd = price_is_usd.native
+    btoi
+    bytec 8 // "price_is_usd"
+    swap
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:147
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.create_vote[routing]() -> void:
+create_vote:
+    // smart_contracts/fry_governance/contract.py:156
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_0 // 1
+    ==
+    assert // invalid number of bytes for arc4.uint8
+    txna ApplicationArgs 3
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    txna ApplicationArgs 4
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    txna ApplicationArgs 5
+    dup
+    len
+    intc_0 // 1
+    ==
+    assert // invalid number of bytes for arc4.uint8
+    txna ApplicationArgs 6
+    dup
+    len
+    intc_0 // 1
+    ==
+    assert // invalid number of bytes for arc4.uint8
+    txn GroupIndex
+    intc_0 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_0 // pay
+    ==
+    assert // transaction type is pay
+    // smart_contracts/fry_governance/contract.py:172-173
+    // # Auth check
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can create vote"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can create vote
+    // smart_contracts/fry_governance/contract.py:175-176
+    // # Atomic group validation
+    // assert Global.group_size == UInt64(2), "Group size must be 2"
+    global GroupSize
+    pushint 2
+    ==
+    assert // Group size must be 2
+    // smart_contracts/fry_governance/contract.py:178
+    // mbr_payment.receiver == Global.current_application_address
+    dup
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    // smart_contracts/fry_governance/contract.py:177-179
+    // assert (
+    //     mbr_payment.receiver == Global.current_application_address
+    // ), "Payment must be to contract"
+    assert // Payment must be to contract
+    // smart_contracts/fry_governance/contract.py:180
+    // assert mbr_payment.amount >= UInt64(VOTE_BOX_MBR), "Insufficient MBR payment"
+    gtxns Amount
+    intc 4 // 104100
+    >=
+    assert // Insufficient MBR payment
+    // smart_contracts/fry_governance/contract.py:182-183
+    // # Parameter validation
+    // assert end_date.native > Global.latest_timestamp, "End date must be in future"
+    dig 3
+    btoi
+    global LatestTimestamp
+    >
+    assert // End date must be in future
+    // smart_contracts/fry_governance/contract.py:184
+    // assert options_count.native >= MIN_OPTIONS, "Too few options"
+    dig 4
+    btoi
+    dup
+    pushint 2
+    >=
+    assert // Too few options
+    // smart_contracts/fry_governance/contract.py:185
+    // assert options_count.native <= MAX_OPTIONS, "Too many options"
+    intc_3 // 8
+    <=
+    assert // Too many options
+    // smart_contracts/fry_governance/contract.py:187-188
+    // # Build vote box key
+    // vote_box_key = VOTE_BOX_PREFIX + vote_id.bytes
+    bytec 4 // 0x76
+    dig 6
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:190-191
+    // # Check vote doesn't already exist
+    // assert not box_exists(vote_box_key), "Vote already exists"
+    !
+    assert // Vote already exists
+    // smart_contracts/fry_governance/contract.py:193-194
+    // # Create vote box
+    // op.Box.create(vote_box_key, UInt64(VOTE_BOX_SIZE))
+    dup
+    pushint 220
+    box_create
+    pop
+    // smart_contracts/fry_governance/contract.py:217
+    // Txn.sender.bytes
+    txn Sender
+    // smart_contracts/fry_governance/contract.py:219
+    // created_at=arc4.UInt64(Global.latest_timestamp),
+    global LatestTimestamp
+    itob
+    // smart_contracts/fry_governance/contract.py:208-222
+    // vote_record = VoteRecord(
+    //     vote_id=vote_id.copy(),
+    //     options_count=options_count,
+    //     end_date=end_date,
+    //     lock_duration=lock_duration,
+    //     super_majority=super_majority,
+    //     vote_type=vote_type,
+    //     closed=arc4.UInt8(0),
+    //     created_by=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     created_at=arc4.UInt64(Global.latest_timestamp),
+    //     total_tokens=zero_totals.copy(),
+    //     total_voters=zero_totals.copy(),
+    // )
+    uncover 8
+    uncover 8
+    concat
+    uncover 7
+    concat
+    uncover 6
+    concat
+    uncover 5
+    concat
+    uncover 4
+    concat
+    // smart_contracts/fry_governance/contract.py:215
+    // closed=arc4.UInt8(0),
+    pushbytes 0x00
+    // smart_contracts/fry_governance/contract.py:208-222
+    // vote_record = VoteRecord(
+    //     vote_id=vote_id.copy(),
+    //     options_count=options_count,
+    //     end_date=end_date,
+    //     lock_duration=lock_duration,
+    //     super_majority=super_majority,
+    //     vote_type=vote_type,
+    //     closed=arc4.UInt8(0),
+    //     created_by=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     created_at=arc4.UInt64(Global.latest_timestamp),
+    //     total_tokens=zero_totals.copy(),
+    //     total_voters=zero_totals.copy(),
+    // )
+    concat
+    uncover 2
+    concat
+    swap
+    concat
+    bytec 10 // 0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+    concat
+    // smart_contracts/fry_governance/contract.py:224
+    // op.Box.put(vote_box_key, vote_record.bytes)
+    box_put
+    // smart_contracts/fry_governance/contract.py:225
+    // self.total_active_votes += UInt64(1)
+    intc_1 // 0
+    bytec_2 // "total_active_votes"
+    app_global_get_ex
+    assert // check self.total_active_votes exists
+    intc_0 // 1
+    +
+    bytec_2 // "total_active_votes"
+    swap
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:156
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.cast_vote[routing]() -> void:
+cast_vote:
+    // smart_contracts/fry_governance/contract.py:227
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_0 // 1
+    ==
+    assert // invalid number of bytes for arc4.uint8
+    txn GroupIndex
+    pushint 2
+    -
+    dup
+    gtxns TypeEnum
+    intc_0 // pay
+    ==
+    assert // transaction type is pay
+    txn GroupIndex
+    intc_0 // 1
+    -
+    dup
+    gtxns TypeEnum
+    pushint 4 // axfer
+    ==
+    assert // transaction type is axfer
+    // smart_contracts/fry_governance/contract.py:240-241
+    // # Atomic group validation
+    // assert Global.group_size == UInt64(3), "Group size must be 3"
+    global GroupSize
+    pushint 3
+    ==
+    assert // Group size must be 3
+    // smart_contracts/fry_governance/contract.py:245
+    // mbr_payment.receiver == Global.current_application_address
+    dig 1
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    // smart_contracts/fry_governance/contract.py:243-246
+    // # MBR payment validation
+    // assert (
+    //     mbr_payment.receiver == Global.current_application_address
+    // ), "Payment must be to contract"
+    assert // Payment must be to contract
+    // smart_contracts/fry_governance/contract.py:247
+    // assert mbr_payment.amount >= UInt64(STAKE_BOX_MBR), "Insufficient MBR payment"
+    swap
+    gtxns Amount
+    intc 5 // 61700
+    >=
+    assert // Insufficient MBR payment
+    // smart_contracts/fry_governance/contract.py:251
+    // asset_transfer.asset_receiver == Global.current_application_address
+    dup
+    gtxns AssetReceiver
+    global CurrentApplicationAddress
+    ==
+    // smart_contracts/fry_governance/contract.py:249-252
+    // # Asset transfer validation
+    // assert (
+    //     asset_transfer.asset_receiver == Global.current_application_address
+    // ), "Asset must be sent to contract"
+    assert // Asset must be sent to contract
+    // smart_contracts/fry_governance/contract.py:254
+    // asset_transfer.xfer_asset == Asset(self.fry_asa_id)
+    dup
+    gtxns XferAsset
+    intc_1 // 0
+    bytec_1 // "fry_asa_id"
+    app_global_get_ex
+    assert // check self.fry_asa_id exists
+    ==
+    // smart_contracts/fry_governance/contract.py:253-255
+    // assert (
+    //     asset_transfer.xfer_asset == Asset(self.fry_asa_id)
+    // ), "Must transfer FRY tokens"
+    assert // Must transfer FRY tokens
+    // smart_contracts/fry_governance/contract.py:256
+    // assert asset_transfer.sender == Txn.sender, "Asset sender must match caller"
+    dup
+    gtxns Sender
+    txn Sender
+    ==
+    assert // Asset sender must match caller
+    // smart_contracts/fry_governance/contract.py:257
+    // assert asset_transfer.asset_amount > UInt64(0), "Must stake some tokens"
+    gtxns AssetAmount
+    dup
+    assert // Must stake some tokens
+    // smart_contracts/fry_governance/contract.py:259-260
+    // # Get vote record
+    // vote_box_key = VOTE_BOX_PREFIX + vote_id.bytes
+    bytec 4 // 0x76
+    dig 3
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:261
+    // assert box_exists(vote_box_key), "Vote does not exist"
+    assert // Vote does not exist
+    // smart_contracts/fry_governance/contract.py:263
+    // vote_content, _exists = op.Box.get(vote_box_key)
+    dup
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:266-267
+    // # Vote status validation
+    // assert vote_record.closed.native == 0, "Vote is closed"
+    dup
+    pushint 51
+    getbyte
+    !
+    assert // Vote is closed
+    // smart_contracts/fry_governance/contract.py:269
+    // vote_record.end_date.native > Global.latest_timestamp
+    dup
+    pushint 33
+    extract_uint64
+    global LatestTimestamp
+    >
+    // smart_contracts/fry_governance/contract.py:268-270
+    // assert (
+    //     vote_record.end_date.native > Global.latest_timestamp
+    // ), "Vote has expired"
+    assert // Vote has expired
+    // smart_contracts/fry_governance/contract.py:272
+    // vote_record.vote_type.native != VOTE_TYPE_TEMP_CHECK
+    dup
+    pushint 50
+    getbyte
+    pushint 2
+    !=
+    // smart_contracts/fry_governance/contract.py:271-273
+    // assert (
+    //     vote_record.vote_type.native != VOTE_TYPE_TEMP_CHECK
+    // ), "Cannot stake on temp check votes"
+    assert // Cannot stake on temp check votes
+    // smart_contracts/fry_governance/contract.py:275
+    // option_index.native < vote_record.options_count.native
+    dig 3
+    btoi
+    dig 1
+    intc_2 // 32
+    getbyte
+    dig 1
+    >
+    // smart_contracts/fry_governance/contract.py:274-276
+    // assert (
+    //     option_index.native < vote_record.options_count.native
+    // ), "Invalid option index"
+    assert // Invalid option index
+    // smart_contracts/fry_governance/contract.py:278-280
+    // # Check user hasn't voted (stake box doesn't exist)
+    // # Use hash of vote_id + voter to fit 64-byte box name limit (1 + 32 = 33 bytes)
+    // stake_box_key = STAKE_BOX_PREFIX + op.sha256(vote_id.bytes + Txn.sender.bytes)
+    dig 5
+    txn Sender
+    concat
+    sha256
+    bytec 6 // 0x73
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:281
+    // assert not box_exists(stake_box_key), "Already voted"
+    !
+    assert // Already voted
+    // smart_contracts/fry_governance/contract.py:283-284
+    // # Create stake box
+    // op.Box.create(stake_box_key, UInt64(STAKE_BOX_SIZE))
+    dup
+    pushint 82
+    box_create
+    pop
+    // smart_contracts/fry_governance/contract.py:288
+    // Txn.sender.bytes
+    txn Sender
+    // smart_contracts/fry_governance/contract.py:292
+    // token_amount=arc4.UInt64(asset_transfer.asset_amount),
+    dig 5
+    itob
+    // smart_contracts/fry_governance/contract.py:293
+    // timestamp=arc4.UInt64(Global.latest_timestamp),
+    global LatestTimestamp
+    itob
+    // smart_contracts/fry_governance/contract.py:286-295
+    // stake_record = StakeRecord(
+    //     voter=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     vote_id=vote_id.copy(),
+    //     option_index=option_index,
+    //     token_amount=arc4.UInt64(asset_transfer.asset_amount),
+    //     timestamp=arc4.UInt64(Global.latest_timestamp),
+    //     withdrawn=arc4.UInt8(0),
+    // )
+    uncover 2
+    uncover 9
+    concat
+    uncover 8
+    concat
+    uncover 2
+    concat
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:294
+    // withdrawn=arc4.UInt8(0),
+    pushbytes 0x00
+    // smart_contracts/fry_governance/contract.py:286-295
+    // stake_record = StakeRecord(
+    //     voter=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     vote_id=vote_id.copy(),
+    //     option_index=option_index,
+    //     token_amount=arc4.UInt64(asset_transfer.asset_amount),
+    //     timestamp=arc4.UInt64(Global.latest_timestamp),
+    //     withdrawn=arc4.UInt8(0),
+    // )
+    concat
+    // smart_contracts/fry_governance/contract.py:297
+    // op.Box.put(stake_box_key, stake_record.bytes)
+    box_put
+    // smart_contracts/fry_governance/contract.py:301
+    // current_tokens = vote_record.total_tokens[idx].native
+    dig 1
+    extract 92 64
+    swap
+    intc_3 // 8
+    *
+    dup2
+    extract_uint64
+    // smart_contracts/fry_governance/contract.py:302
+    // current_voters = vote_record.total_voters[idx].native
+    dig 3
+    extract 156 64
+    dig 2
+    extract_uint64
+    // smart_contracts/fry_governance/contract.py:304-307
+    // # Safe addition with overflow check
+    // new_tokens_high, new_tokens_low = op.addw(
+    //     current_tokens, asset_transfer.asset_amount
+    // )
+    swap
+    uncover 6
+    addw
+    // smart_contracts/fry_governance/contract.py:308
+    // assert new_tokens_high == UInt64(0), "Token overflow"
+    swap
+    !
+    assert // Token overflow
+    // smart_contracts/fry_governance/contract.py:310
+    // new_voters_high, new_voters_low = op.addw(current_voters, UInt64(1))
+    swap
+    intc_0 // 1
+    addw
+    // smart_contracts/fry_governance/contract.py:311
+    // assert new_voters_high == UInt64(0), "Voter count overflow"
+    swap
+    !
+    assert // Voter count overflow
+    // smart_contracts/fry_governance/contract.py:313-314
+    // # Update totals in vote record
+    // vote_record.total_tokens[idx] = arc4.UInt64(new_tokens_low)
+    swap
+    itob
+    uncover 3
+    dig 3
+    uncover 2
+    replace3 // on error: index access is out of bounds
+    uncover 3
+    swap
+    replace2 92
+    // smart_contracts/fry_governance/contract.py:315
+    // vote_record.total_voters[idx] = arc4.UInt64(new_voters_low)
+    swap
+    itob
+    dig 1
+    extract 156 64
+    uncover 3
+    uncover 2
+    replace3 // on error: index access is out of bounds
+    replace2 156
+    // smart_contracts/fry_governance/contract.py:317
+    // op.Box.put(vote_box_key, vote_record.bytes)
+    box_put
+    // smart_contracts/fry_governance/contract.py:227
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.cast_temp_vote[routing]() -> void:
+cast_temp_vote:
+    // smart_contracts/fry_governance/contract.py:319
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_0 // 1
+    ==
+    assert // invalid number of bytes for arc4.uint8
+    txn GroupIndex
+    intc_0 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_0 // pay
+    ==
+    assert // transaction type is pay
+    // smart_contracts/fry_governance/contract.py:335-336
+    // # Atomic group validation
+    // assert Global.group_size == UInt64(2), "Group size must be 2"
+    global GroupSize
+    pushint 2
+    ==
+    assert // Group size must be 2
+    // smart_contracts/fry_governance/contract.py:340
+    // mbr_payment.receiver == Global.current_application_address
+    dup
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    // smart_contracts/fry_governance/contract.py:338-341
+    // # MBR payment validation
+    // assert (
+    //     mbr_payment.receiver == Global.current_application_address
+    // ), "Payment must be to contract"
+    assert // Payment must be to contract
+    // smart_contracts/fry_governance/contract.py:342
+    // assert mbr_payment.amount >= UInt64(STAKE_BOX_MBR), "Insufficient MBR payment"
+    gtxns Amount
+    intc 5 // 61700
+    >=
+    assert // Insufficient MBR payment
+    // smart_contracts/fry_governance/contract.py:344-345
+    // # Get vote record
+    // vote_box_key = VOTE_BOX_PREFIX + vote_id.bytes
+    bytec 4 // 0x76
+    dig 2
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:346
+    // assert box_exists(vote_box_key), "Vote does not exist"
+    assert // Vote does not exist
+    // smart_contracts/fry_governance/contract.py:348
+    // vote_content, _exists = op.Box.get(vote_box_key)
+    dup
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:353
+    // vote_record.vote_type.native == VOTE_TYPE_TEMP_CHECK
+    dup
+    pushint 50
+    getbyte
+    pushint 2
+    ==
+    // smart_contracts/fry_governance/contract.py:351-354
+    // # Vote type validation
+    // assert (
+    //     vote_record.vote_type.native == VOTE_TYPE_TEMP_CHECK
+    // ), "Not a temp check vote"
+    assert // Not a temp check vote
+    // smart_contracts/fry_governance/contract.py:355
+    // assert vote_record.closed.native == 0, "Vote is closed"
+    dup
+    pushint 51
+    getbyte
+    !
+    assert // Vote is closed
+    // smart_contracts/fry_governance/contract.py:357
+    // vote_record.end_date.native > Global.latest_timestamp
+    dup
+    pushint 33
+    extract_uint64
+    global LatestTimestamp
+    >
+    // smart_contracts/fry_governance/contract.py:356-358
+    // assert (
+    //     vote_record.end_date.native > Global.latest_timestamp
+    // ), "Vote has expired"
+    assert // Vote has expired
+    // smart_contracts/fry_governance/contract.py:360
+    // option_index.native < vote_record.options_count.native
+    dig 2
+    btoi
+    dig 1
+    intc_2 // 32
+    getbyte
+    dig 1
+    >
+    // smart_contracts/fry_governance/contract.py:359-361
+    // assert (
+    //     option_index.native < vote_record.options_count.native
+    // ), "Invalid option index"
+    assert // Invalid option index
+    // smart_contracts/fry_governance/contract.py:363-364
+    // # Check minimum balance is configured
+    // min_balance = self.min_temp_check_balance
+    intc_1 // 0
+    bytec 5 // "min_temp_check_balance"
+    app_global_get_ex
+    assert // check self.min_temp_check_balance exists
+    // smart_contracts/fry_governance/contract.py:365
+    // assert min_balance > UInt64(0), "Min balance not configured"
+    dup
+    assert // Min balance not configured
+    // smart_contracts/fry_governance/contract.py:369
+    // Txn.sender, self.fry_asa_id
+    txn Sender
+    intc_1 // 0
+    bytec_1 // "fry_asa_id"
+    app_global_get_ex
+    assert // check self.fry_asa_id exists
+    // smart_contracts/fry_governance/contract.py:367-370
+    // # Check voter's FRY balance using native asset holding
+    // fry_balance, has_asset = op.AssetHoldingGet.asset_balance(
+    //     Txn.sender, self.fry_asa_id
+    // )
+    asset_holding_get AssetBalance
+    // smart_contracts/fry_governance/contract.py:371
+    // assert has_asset, "Not opted into FRY"
+    assert // Not opted into FRY
+    // smart_contracts/fry_governance/contract.py:372
+    // assert fry_balance >= min_balance, "Insufficient FRY balance"
+    <=
+    assert // Insufficient FRY balance
+    // smart_contracts/fry_governance/contract.py:374-376
+    // # Check user hasn't voted
+    // # Use hash of vote_id + voter to fit 64-byte box name limit (1 + 32 = 33 bytes)
+    // stake_box_key = STAKE_BOX_PREFIX + op.sha256(vote_id.bytes + Txn.sender.bytes)
+    dig 4
+    txn Sender
+    concat
+    sha256
+    bytec 6 // 0x73
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:377
+    // assert not box_exists(stake_box_key), "Already voted"
+    !
+    assert // Already voted
+    // smart_contracts/fry_governance/contract.py:379-380
+    // # Create stake box (token_amount=0, withdrawn=1 since no tokens to withdraw)
+    // op.Box.create(stake_box_key, UInt64(STAKE_BOX_SIZE))
+    dup
+    pushint 82
+    box_create
+    pop
+    // smart_contracts/fry_governance/contract.py:384
+    // Txn.sender.bytes
+    txn Sender
+    // smart_contracts/fry_governance/contract.py:389
+    // timestamp=arc4.UInt64(Global.latest_timestamp),
+    global LatestTimestamp
+    itob
+    // smart_contracts/fry_governance/contract.py:382-391
+    // stake_record = StakeRecord(
+    //     voter=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     vote_id=vote_id.copy(),
+    //     option_index=option_index,
+    //     token_amount=arc4.UInt64(0),  # No tokens staked for temp check
+    //     timestamp=arc4.UInt64(Global.latest_timestamp),
+    //     withdrawn=arc4.UInt8(1),  # Mark as withdrawn since nothing to withdraw
+    // )
+    swap
+    uncover 7
+    concat
+    uncover 6
+    concat
+    // smart_contracts/fry_governance/contract.py:388
+    // token_amount=arc4.UInt64(0),  # No tokens staked for temp check
+    pushbytes 0x0000000000000000
+    // smart_contracts/fry_governance/contract.py:382-391
+    // stake_record = StakeRecord(
+    //     voter=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     vote_id=vote_id.copy(),
+    //     option_index=option_index,
+    //     token_amount=arc4.UInt64(0),  # No tokens staked for temp check
+    //     timestamp=arc4.UInt64(Global.latest_timestamp),
+    //     withdrawn=arc4.UInt8(1),  # Mark as withdrawn since nothing to withdraw
+    // )
+    concat
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:390
+    // withdrawn=arc4.UInt8(1),  # Mark as withdrawn since nothing to withdraw
+    pushbytes 0x01
+    // smart_contracts/fry_governance/contract.py:382-391
+    // stake_record = StakeRecord(
+    //     voter=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     vote_id=vote_id.copy(),
+    //     option_index=option_index,
+    //     token_amount=arc4.UInt64(0),  # No tokens staked for temp check
+    //     timestamp=arc4.UInt64(Global.latest_timestamp),
+    //     withdrawn=arc4.UInt8(1),  # Mark as withdrawn since nothing to withdraw
+    // )
+    concat
+    // smart_contracts/fry_governance/contract.py:393
+    // op.Box.put(stake_box_key, stake_record.bytes)
+    box_put
+    // smart_contracts/fry_governance/contract.py:397
+    // current_tokens = vote_record.total_tokens[idx].native
+    dig 1
+    extract 92 64
+    swap
+    intc_3 // 8
+    *
+    dup2
+    extract_uint64
+    // smart_contracts/fry_governance/contract.py:398
+    // current_voters = vote_record.total_voters[idx].native
+    dig 3
+    extract 156 64
+    dig 2
+    extract_uint64
+    // smart_contracts/fry_governance/contract.py:400-401
+    // # Safe addition with overflow check
+    // new_tokens_high, new_tokens_low = op.addw(current_tokens, UInt64(1))
+    swap
+    intc_0 // 1
+    addw
+    // smart_contracts/fry_governance/contract.py:402
+    // assert new_tokens_high == UInt64(0), "Token overflow"
+    swap
+    !
+    assert // Token overflow
+    // smart_contracts/fry_governance/contract.py:404
+    // new_voters_high, new_voters_low = op.addw(current_voters, UInt64(1))
+    swap
+    intc_0 // 1
+    addw
+    // smart_contracts/fry_governance/contract.py:405
+    // assert new_voters_high == UInt64(0), "Voter count overflow"
+    swap
+    !
+    assert // Voter count overflow
+    // smart_contracts/fry_governance/contract.py:407
+    // vote_record.total_tokens[idx] = arc4.UInt64(new_tokens_low)
+    swap
+    itob
+    uncover 3
+    dig 3
+    uncover 2
+    replace3 // on error: index access is out of bounds
+    uncover 3
+    swap
+    replace2 92
+    // smart_contracts/fry_governance/contract.py:408
+    // vote_record.total_voters[idx] = arc4.UInt64(new_voters_low)
+    swap
+    itob
+    dig 1
+    extract 156 64
+    uncover 3
+    uncover 2
+    replace3 // on error: index access is out of bounds
+    replace2 156
+    // smart_contracts/fry_governance/contract.py:410
+    // op.Box.put(vote_box_key, vote_record.bytes)
+    box_put
+    // smart_contracts/fry_governance/contract.py:319
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.request_temp_check[routing]() -> void:
+request_temp_check:
+    // smart_contracts/fry_governance/contract.py:412
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_3 // 8
+    ==
+    assert // invalid number of bytes for arc4.uint64
+    txn GroupIndex
+    intc_0 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_0 // pay
+    ==
+    assert // transaction type is pay
+    // smart_contracts/fry_governance/contract.py:430-431
+    // # Atomic group validation
+    // assert Global.group_size == UInt64(2), "Group size must be 2"
+    global GroupSize
+    pushint 2
+    ==
+    assert // Group size must be 2
+    // smart_contracts/fry_governance/contract.py:433
+    // mbr_payment.receiver == Global.current_application_address
+    dup
+    gtxns Receiver
+    global CurrentApplicationAddress
+    ==
+    // smart_contracts/fry_governance/contract.py:432-434
+    // assert (
+    //     mbr_payment.receiver == Global.current_application_address
+    // ), "Payment must be to contract"
+    assert // Payment must be to contract
+    // smart_contracts/fry_governance/contract.py:435
+    // assert mbr_payment.amount >= UInt64(VOTE_BOX_MBR), "Insufficient MBR payment"
+    gtxns Amount
+    intc 4 // 104100
+    >=
+    assert // Insufficient MBR payment
+    // smart_contracts/fry_governance/contract.py:437-438
+    // # Check caller's FRY balance (same requirement as casting temp vote)
+    // min_balance = self.min_temp_check_balance
+    intc_1 // 0
+    bytec 5 // "min_temp_check_balance"
+    app_global_get_ex
+    assert // check self.min_temp_check_balance exists
+    // smart_contracts/fry_governance/contract.py:439
+    // assert min_balance > UInt64(0), "Min balance not configured"
+    dup
+    assert // Min balance not configured
+    // smart_contracts/fry_governance/contract.py:442
+    // Txn.sender, self.fry_asa_id
+    txn Sender
+    intc_1 // 0
+    bytec_1 // "fry_asa_id"
+    app_global_get_ex
+    assert // check self.fry_asa_id exists
+    // smart_contracts/fry_governance/contract.py:441-443
+    // fry_balance, has_asset = op.AssetHoldingGet.asset_balance(
+    //     Txn.sender, self.fry_asa_id
+    // )
+    asset_holding_get AssetBalance
+    // smart_contracts/fry_governance/contract.py:444
+    // assert has_asset, "Not opted into FRY"
+    assert // Not opted into FRY
+    // smart_contracts/fry_governance/contract.py:445
+    // assert fry_balance >= min_balance, "Insufficient FRY balance"
+    <=
+    assert // Insufficient FRY balance
+    // smart_contracts/fry_governance/contract.py:447-448
+    // # End date validation
+    // assert end_date.native > Global.latest_timestamp, "End date must be in future"
+    dup
+    btoi
+    dup
+    global LatestTimestamp
+    >
+    assert // End date must be in future
+    // smart_contracts/fry_governance/contract.py:450-451
+    // # Enforce 7-day max duration
+    // max_end = Global.latest_timestamp + UInt64(MAX_TEMP_CHECK_DURATION)
+    global LatestTimestamp
+    pushint 604800
+    +
+    // smart_contracts/fry_governance/contract.py:452
+    // assert end_date.native <= max_end, "Duration exceeds 7-day maximum"
+    <=
+    assert // Duration exceeds 7-day maximum
+    // smart_contracts/fry_governance/contract.py:454-455
+    // # Build vote box key
+    // vote_box_key = VOTE_BOX_PREFIX + vote_id.bytes
+    bytec 4 // 0x76
+    dig 2
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:457-458
+    // # Check vote doesn't already exist
+    // assert not box_exists(vote_box_key), "Vote already exists"
+    !
+    assert // Vote already exists
+    // smart_contracts/fry_governance/contract.py:460-461
+    // # Create vote box
+    // op.Box.create(vote_box_key, UInt64(VOTE_BOX_SIZE))
+    dup
+    pushint 220
+    box_create
+    pop
+    // smart_contracts/fry_governance/contract.py:484
+    // Txn.sender.bytes
+    txn Sender
+    // smart_contracts/fry_governance/contract.py:486
+    // created_at=arc4.UInt64(Global.latest_timestamp),
+    global LatestTimestamp
+    itob
+    // smart_contracts/fry_governance/contract.py:475-489
+    // vote_record = VoteRecord(
+    //     vote_id=vote_id.copy(),
+    //     options_count=arc4.UInt8(2),  # Fixed: yes/no
+    //     end_date=end_date,
+    //     lock_duration=arc4.UInt64(0),  # No lock for temp checks
+    //     super_majority=arc4.UInt8(0),  # Simple majority
+    //     vote_type=arc4.UInt8(VOTE_TYPE_TEMP_CHECK),
+    //     closed=arc4.UInt8(0),
+    //     created_by=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     created_at=arc4.UInt64(Global.latest_timestamp),
+    //     total_tokens=zero_totals.copy(),
+    //     total_voters=zero_totals.copy(),
+    // )
+    uncover 4
+    // smart_contracts/fry_governance/contract.py:477
+    // options_count=arc4.UInt8(2),  # Fixed: yes/no
+    pushbytes 0x02
+    // smart_contracts/fry_governance/contract.py:475-489
+    // vote_record = VoteRecord(
+    //     vote_id=vote_id.copy(),
+    //     options_count=arc4.UInt8(2),  # Fixed: yes/no
+    //     end_date=end_date,
+    //     lock_duration=arc4.UInt64(0),  # No lock for temp checks
+    //     super_majority=arc4.UInt8(0),  # Simple majority
+    //     vote_type=arc4.UInt8(VOTE_TYPE_TEMP_CHECK),
+    //     closed=arc4.UInt8(0),
+    //     created_by=arc4.StaticArray[arc4.Byte, Literal[32]].from_bytes(
+    //         Txn.sender.bytes
+    //     ),
+    //     created_at=arc4.UInt64(Global.latest_timestamp),
+    //     total_tokens=zero_totals.copy(),
+    //     total_voters=zero_totals.copy(),
+    // )
+    concat
+    uncover 4
+    concat
+    pushbytes 0x0000000000000000000200
+    concat
+    uncover 2
+    concat
+    swap
+    concat
+    bytec 10 // 0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+    concat
+    // smart_contracts/fry_governance/contract.py:491
+    // op.Box.put(vote_box_key, vote_record.bytes)
+    box_put
+    // smart_contracts/fry_governance/contract.py:492
+    // self.total_active_votes += UInt64(1)
+    intc_1 // 0
+    bytec_2 // "total_active_votes"
+    app_global_get_ex
+    assert // check self.total_active_votes exists
+    intc_0 // 1
+    +
+    bytec_2 // "total_active_votes"
+    swap
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:412
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.withdraw[routing]() -> void:
+withdraw:
+    // smart_contracts/fry_governance/contract.py:494
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/fry_governance/contract.py:504-506
+    // # Get stake record
+    // # Use hash of vote_id + voter to fit 64-byte box name limit (1 + 32 = 33 bytes)
+    // stake_box_key = STAKE_BOX_PREFIX + op.sha256(vote_id.bytes + Txn.sender.bytes)
+    dup
+    txn Sender
+    concat
+    sha256
+    bytec 6 // 0x73
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:507
+    // assert box_exists(stake_box_key), "Stake not found"
+    assert // Stake not found
+    // smart_contracts/fry_governance/contract.py:509
+    // stake_content, _exists = op.Box.get(stake_box_key)
+    dup
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:514
+    // stake_record.voter.bytes == Txn.sender.bytes
+    dup
+    extract 0 32
+    txn Sender
+    ==
+    // smart_contracts/fry_governance/contract.py:512-515
+    // # Verify caller is the voter
+    // assert (
+    //     stake_record.voter.bytes == Txn.sender.bytes
+    // ), "Only voter can withdraw"
+    assert // Only voter can withdraw
+    // smart_contracts/fry_governance/contract.py:517-518
+    // # Get vote record for lock duration
+    // vote_box_key = VOTE_BOX_PREFIX + vote_id.bytes
+    bytec 4 // 0x76
+    uncover 3
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:519
+    // assert box_exists(vote_box_key), "Vote not found"
+    assert // Vote not found
+    // smart_contracts/fry_governance/contract.py:521
+    // vote_content, _exists = op.Box.get(vote_box_key)
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:524-525
+    // # Check lock period has passed
+    // unlock_time = stake_record.timestamp.native + vote_record.lock_duration.native
+    dig 1
+    pushint 73
+    extract_uint64
+    swap
+    pushint 41
+    extract_uint64
+    +
+    // smart_contracts/fry_governance/contract.py:526
+    // assert Global.latest_timestamp >= unlock_time, "Lock period not expired"
+    global LatestTimestamp
+    <=
+    assert // Lock period not expired
+    // smart_contracts/fry_governance/contract.py:528-529
+    // # Extract token amount BEFORE deleting the box
+    // token_amount = stake_record.token_amount.native
+    pushint 65
+    extract_uint64
+    dup
+    uncover 2
+    // smart_contracts/fry_governance/contract.py:531-532
+    // # Delete the stake box (replaces marking as withdrawn)
+    // op.Box.delete(stake_box_key)
+    box_del
+    pop
+    // smart_contracts/fry_governance/contract.py:534-535
+    // # Return FRY tokens if any
+    // if token_amount > UInt64(0):
+    bz withdraw_after_if_else@4
+    // smart_contracts/fry_governance/contract.py:536-541
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.fry_asa_id,
+    //     asset_receiver=Txn.sender,
+    //     asset_amount=token_amount,
+    //     fee=0,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/fry_governance/contract.py:537
+    // xfer_asset=self.fry_asa_id,
+    intc_1 // 0
+    bytec_1 // "fry_asa_id"
+    app_global_get_ex
+    assert // check self.fry_asa_id exists
+    // smart_contracts/fry_governance/contract.py:538
+    // asset_receiver=Txn.sender,
+    txn Sender
+    dig 2
+    itxn_field AssetAmount
+    itxn_field AssetReceiver
+    itxn_field XferAsset
+    // smart_contracts/fry_governance/contract.py:536
+    // itxn.AssetTransfer(
+    pushint 4 // axfer
+    itxn_field TypeEnum
+    // smart_contracts/fry_governance/contract.py:540
+    // fee=0,
+    intc_1 // 0
+    itxn_field Fee
+    // smart_contracts/fry_governance/contract.py:536-541
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.fry_asa_id,
+    //     asset_receiver=Txn.sender,
+    //     asset_amount=token_amount,
+    //     fee=0,
+    // ).submit()
+    itxn_submit
+
+withdraw_after_if_else@4:
+    // smart_contracts/fry_governance/contract.py:543-548
+    // # Refund MBR to voter (always)
+    // itxn.Payment(
+    //     receiver=Txn.sender,
+    //     amount=UInt64(ACTUAL_STAKE_BOX_MBR),
+    //     fee=0,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/fry_governance/contract.py:545
+    // receiver=Txn.sender,
+    txn Sender
+    // smart_contracts/fry_governance/contract.py:546
+    // amount=UInt64(ACTUAL_STAKE_BOX_MBR),
+    intc 6 // 48500
+    itxn_field Amount
+    itxn_field Receiver
+    // smart_contracts/fry_governance/contract.py:543-544
+    // # Refund MBR to voter (always)
+    // itxn.Payment(
+    intc_0 // pay
+    itxn_field TypeEnum
+    // smart_contracts/fry_governance/contract.py:547
+    // fee=0,
+    intc_1 // 0
+    itxn_field Fee
+    // smart_contracts/fry_governance/contract.py:543-548
+    // # Refund MBR to voter (always)
+    // itxn.Payment(
+    //     receiver=Txn.sender,
+    //     amount=UInt64(ACTUAL_STAKE_BOX_MBR),
+    //     fee=0,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/fry_governance/contract.py:494
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.admin_close_vote[routing]() -> void:
+admin_close_vote:
+    // smart_contracts/fry_governance/contract.py:550
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/fry_governance/contract.py:556
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can close vote"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can close vote
+    // smart_contracts/fry_governance/contract.py:558
+    // vote_box_key = VOTE_BOX_PREFIX + vote_id.bytes
+    bytec 4 // 0x76
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:559
+    // assert box_exists(vote_box_key), "Vote not found"
+    assert // Vote not found
+    // smart_contracts/fry_governance/contract.py:561
+    // vote_content, _exists = op.Box.get(vote_box_key)
+    dup
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:563
+    // assert vote_record.closed.native == 0, "Vote already closed"
+    dup
+    pushint 51
+    getbyte
+    !
+    assert // Vote already closed
+    // smart_contracts/fry_governance/contract.py:565
+    // vote_record.closed = arc4.UInt8(1)
+    pushbytes 0x01
+    replace2 51
+    // smart_contracts/fry_governance/contract.py:566
+    // op.Box.put(vote_box_key, vote_record.bytes)
+    box_put
+    // smart_contracts/fry_governance/contract.py:568
+    // self.total_active_votes -= UInt64(1)
+    intc_1 // 0
+    bytec_2 // "total_active_votes"
+    app_global_get_ex
+    assert // check self.total_active_votes exists
+    intc_0 // 1
+    -
+    bytec_2 // "total_active_votes"
+    swap
+    app_global_put
+    // smart_contracts/fry_governance/contract.py:550
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.admin_emergency_refund[routing]() -> void:
+admin_emergency_refund:
+    // smart_contracts/fry_governance/contract.py:570
+    // @arc4.abimethod
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    cover 2
+    dup
+    len
+    dup
+    cover 3
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/fry_governance/contract.py:581
+    // assert Txn.sender == Account(ADMIN_ADDRESS), "Only admin can emergency refund"
+    txn Sender
+    bytec_0 // addr E2F2LT2INE75DBOYHQXTCTOP2PAP5MHAXQRXTTCCXFKHQTVG36DJONBQZE
+    ==
+    assert // Only admin can emergency refund
+    // smart_contracts/fry_governance/contract.py:583-585
+    // # Get stake record
+    // # Use hash of vote_id + voter to fit 64-byte box name limit
+    // stake_box_key = STAKE_BOX_PREFIX + op.sha256(vote_id.bytes + voter.bytes)
+    concat
+    sha256
+    bytec 6 // 0x73
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:586
+    // assert box_exists(stake_box_key), "Stake not found"
+    assert // Stake not found
+    // smart_contracts/fry_governance/contract.py:588
+    // stake_content, _exists = op.Box.get(stake_box_key)
+    dup
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:591-592
+    // # Extract token amount BEFORE deleting the box
+    // token_amount = stake_record.token_amount.native
+    pushint 65
+    extract_uint64
+    dup
+    uncover 2
+    // smart_contracts/fry_governance/contract.py:594-595
+    // # Delete the stake box
+    // op.Box.delete(stake_box_key)
+    box_del
+    pop
+    // smart_contracts/fry_governance/contract.py:597-598
+    // # Return FRY tokens if any
+    // if token_amount > UInt64(0):
+    bz admin_emergency_refund_after_if_else@4
+    // smart_contracts/fry_governance/contract.py:599-600
+    // # Decode voter address from bytes
+    // voter_account = Account(voter.bytes)
+    intc_2 // 32
+    dig 2
+    ==
+    assert // Address length is 32 bytes
+    // smart_contracts/fry_governance/contract.py:602-607
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.fry_asa_id,
+    //     asset_receiver=voter_account,
+    //     asset_amount=token_amount,
+    //     fee=0,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/fry_governance/contract.py:603
+    // xfer_asset=self.fry_asa_id,
+    intc_1 // 0
+    bytec_1 // "fry_asa_id"
+    app_global_get_ex
+    assert // check self.fry_asa_id exists
+    dig 1
+    itxn_field AssetAmount
+    dig 3
+    itxn_field AssetReceiver
+    itxn_field XferAsset
+    // smart_contracts/fry_governance/contract.py:602
+    // itxn.AssetTransfer(
+    pushint 4 // axfer
+    itxn_field TypeEnum
+    // smart_contracts/fry_governance/contract.py:606
+    // fee=0,
+    intc_1 // 0
+    itxn_field Fee
+    // smart_contracts/fry_governance/contract.py:602-607
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.fry_asa_id,
+    //     asset_receiver=voter_account,
+    //     asset_amount=token_amount,
+    //     fee=0,
+    // ).submit()
+    itxn_submit
+
+admin_emergency_refund_after_if_else@4:
+    // smart_contracts/fry_governance/contract.py:609-610
+    // # Refund MBR to voter (not admin)
+    // voter_account = Account(voter.bytes)
+    intc_2 // 32
+    dig 2
+    ==
+    assert // Address length is 32 bytes
+    // smart_contracts/fry_governance/contract.py:611-615
+    // itxn.Payment(
+    //     receiver=voter_account,
+    //     amount=UInt64(ACTUAL_STAKE_BOX_MBR),
+    //     fee=0,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/fry_governance/contract.py:613
+    // amount=UInt64(ACTUAL_STAKE_BOX_MBR),
+    intc 6 // 48500
+    itxn_field Amount
+    dig 2
+    itxn_field Receiver
+    // smart_contracts/fry_governance/contract.py:611
+    // itxn.Payment(
+    intc_0 // pay
+    itxn_field TypeEnum
+    // smart_contracts/fry_governance/contract.py:614
+    // fee=0,
+    intc_1 // 0
+    itxn_field Fee
+    // smart_contracts/fry_governance/contract.py:611-615
+    // itxn.Payment(
+    //     receiver=voter_account,
+    //     amount=UInt64(ACTUAL_STAKE_BOX_MBR),
+    //     fee=0,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/fry_governance/contract.py:570
+    // @arc4.abimethod
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.get_vote[routing]() -> void:
+get_vote:
+    // smart_contracts/fry_governance/contract.py:617
+    // @arc4.abimethod(readonly=True)
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/fry_governance/contract.py:623
+    // vote_box_key = VOTE_BOX_PREFIX + vote_id.bytes
+    bytec 4 // 0x76
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:624
+    // assert box_exists(vote_box_key), "Vote not found"
+    assert // Vote not found
+    // smart_contracts/fry_governance/contract.py:626
+    // vote_content, _exists = op.Box.get(vote_box_key)
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:617
+    // @arc4.abimethod(readonly=True)
+    bytec 11 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return
+
+
+// smart_contracts.fry_governance.contract.FryGovernance.get_stake[routing]() -> void:
+get_stake:
+    // smart_contracts/fry_governance/contract.py:629
+    // @arc4.abimethod(readonly=True)
+    txna ApplicationArgs 1
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    txna ApplicationArgs 2
+    dup
+    len
+    intc_2 // 32
+    ==
+    assert // invalid number of bytes for arc4.static_array<arc4.uint8, 32>
+    // smart_contracts/fry_governance/contract.py:636-637
+    // # Use hash of vote_id + voter to fit 64-byte box name limit
+    // stake_box_key = STAKE_BOX_PREFIX + op.sha256(vote_id.bytes + voter.bytes)
+    concat
+    sha256
+    bytec 6 // 0x73
+    swap
+    concat
+    // smart_contracts/fry_governance/contract.py:47
+    // _length, exists = op.Box.length(key)
+    dup
+    box_len
+    bury 1
+    // smart_contracts/fry_governance/contract.py:638
+    // assert box_exists(stake_box_key), "Stake not found"
+    assert // Stake not found
+    // smart_contracts/fry_governance/contract.py:640
+    // stake_content, _exists = op.Box.get(stake_box_key)
+    box_get
+    pop
+    // smart_contracts/fry_governance/contract.py:629
+    // @arc4.abimethod(readonly=True)
+    bytec 11 // 0x151f7c75
+    swap
+    concat
+    log
+    intc_0 // 1
+    return

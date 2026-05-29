@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "fry-governance"
+version = "1.0.0"
+description = "FryGovernance - On-chain governance system for Fry Networks"
+authors = ["Fry Networks"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+algorand-python = "^2.0.0"
+algokit-utils = "^2.3.0"
+python-dotenv = "^1.0.0"
+puyapy = "^5.7.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+algorand-python-testing = "^0.4.0"
+black = "^24.0.0"
+ruff = "^0.3.0"
+mypy = "^1.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
